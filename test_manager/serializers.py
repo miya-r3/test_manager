@@ -23,7 +23,7 @@ class TestCaseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TestCase
-        fields = ["id", "title", "description", "status", "priority", "steps"]
+        fields = ["id", "title", "description", "prerequisites", "status", "priority", "steps"]
 
     __test__ = False
 
@@ -65,6 +65,8 @@ class TestSessionSerializer(serializers.ModelSerializer):
             "executed_by", # Also often set by view context (request.user)
             "environment",
             "selected_case_ids",
+            "started_at",
+            "completed_at",
             "completed",
         ]
         read_only_fields = ('project', 'executed_by', 'completed') # 'id' is also read-only by default

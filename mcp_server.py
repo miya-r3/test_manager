@@ -54,6 +54,13 @@ def get_test_execution_detail(session_id: int):
     return _api_get(f"{DJANGO_API_BASE_URL}/api/test-sessions/{session_id}/execute/")
 
 
+@mcp.resource("tm://test_case/{test_case_id}")
+def get_test_case(test_case_id: int):
+    """指定したテストケースの詳細を取得する"""
+    logger.debug(f"get_test_case(test_case_id: {test_case_id})")
+    return _api_get(f"{DJANGO_API_BASE_URL}/api/testcases/{test_case_id}")
+
+
 @mcp.tool()
 def create_new_test_session(project_id: int, session_name: str = None) -> int:
     """指定したプロジェクトに対して新しいテストセッションを作成して、そのテストセッションのIDを得る"""
@@ -79,7 +86,7 @@ def create_new_test_session(project_id: int, session_name: str = None) -> int:
         return {"error": f"Failed to fetch projects: {str(e)}"}
 
 
-def mark_as_completed(test_session_id: int, test_case_id: int, status: str):
+def _mark_as_completed(test_session_id: int, test_case_id: int, status: str):
     """指定したテストセッション中のテストケースが完了状態にする。
     statusは"PASS", "FAIL", "BLOCKED", "SKIPPED"のいずれか"""
     assert status in ["PASS", "FAIL", "BLOCKED", "SKIPPED"]
@@ -99,7 +106,7 @@ def mark_as_completed(test_session_id: int, test_case_id: int, status: str):
 @mcp.tool()
 def mark_as_passed(test_session_id: int, test_case_id: int) -> int:
     """指定したテストセッション中のテストケースが成功したと記録する"""
-    return mark_as_completed(test_session_id=test_session_id,
+    return _mark_as_completed(test_session_id=test_session_id,
                              test_case_id=test_case_id,
                              status="PASS")
 
@@ -107,7 +114,7 @@ def mark_as_passed(test_session_id: int, test_case_id: int) -> int:
 @mcp.tool()
 def mark_as_failed(test_session_id: int, test_case_id: int) -> int:
     """指定したテストセッション中のテストケースが失敗したと記録する"""
-    return mark_as_completed(test_session_id=test_session_id,
+    return _mark_as_completed(test_session_id=test_session_id,
                              test_case_id=test_case_id,
                              status="FAIL")
 
@@ -115,7 +122,7 @@ def mark_as_failed(test_session_id: int, test_case_id: int) -> int:
 @mcp.tool()
 def mark_as_blocked(test_session_id: int, test_case_id: int) -> int:
     """指定したテストセッション中のテストケースがブロックされたと記録する"""
-    return mark_as_completed(test_session_id=test_session_id,
+    return _mark_as_completed(test_session_id=test_session_id,
                              test_case_id=test_case_id,
                              status="BLOCKED")
 
@@ -123,6 +130,6 @@ def mark_as_blocked(test_session_id: int, test_case_id: int) -> int:
 @mcp.tool()
 def mark_as_skipped(test_session_id: int, test_case_id: int) -> int:
     """指定したテストセッション中のテストケースをスキップする"""
-    return mark_as_completed(test_session_id=test_session_id,
+    return _mark_as_completed(test_session_id=test_session_id,
                              test_case_id=test_case_id,
                              status="SKIPPED")

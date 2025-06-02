@@ -92,11 +92,10 @@ def execute_test_case(request, test_session_id):
         completed_count = executions.exclude(status="NOT_TESTED").count()
         progress = (completed_count / total_count) * 100 if total_count > 0 else 0
 
-        remaining_test_cases = [
-            TestCaseSerializer(ne.test_case).data
-            for ne in executions.filter(status="NOT_TESTED")
+        remaining_test_case_ids = [
+            ne.test_case.id for ne in executions.filter(status="NOT_TESTED").order_by("test_case_id")
         ]
-        if not remaining_test_cases:
+        if not remaining_test_case_ids:
             if not test_session.completed_at:
                 test_session.complete()
             response_data = {
@@ -116,7 +115,7 @@ def execute_test_case(request, test_session_id):
                 "total_count": total_count,
                 "completed_count": completed_count,
                 "progress": progress,
-                "remaining_test_cases": remaining_test_cases,
+                "remaining_test_case_ids": remaining_test_case_ids,
             }
         return Response(response_data, status=status.HTTP_200_OK)
     except TestSession.DoesNotExist:
